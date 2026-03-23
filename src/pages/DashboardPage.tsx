@@ -17,6 +17,7 @@ interface Stats {
   resolved: number;
   myTickets: number;
   unassigned: number;
+  overdue: number;
 }
 
 interface TicketRow {
