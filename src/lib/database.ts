@@ -3,7 +3,7 @@ import { get, set, del } from 'idb-keyval';
 
 const DB_KEY = 'ticketing-system-db';
 const DB_VERSION_KEY = 'ticketing-system-db-version';
-const CURRENT_VERSION = 4; // bump to force re-seed
+const CURRENT_VERSION = 5; // bump to force re-seed
 
 let db: Database | null = null;
 let dbReady: Promise<Database> | null = null;
@@ -95,6 +95,19 @@ CREATE TABLE IF NOT EXISTS notifications (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS attachments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticket_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  filename TEXT NOT NULL,
+  mime_type TEXT DEFAULT 'application/octet-stream',
+  size INTEGER DEFAULT 0,
+  data_b64 TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (ticket_id) REFERENCES tickets(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
 CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority);
 CREATE INDEX IF NOT EXISTS idx_tickets_requester ON tickets(requester_id);
@@ -104,6 +117,7 @@ CREATE INDEX IF NOT EXISTS idx_tickets_number ON tickets(ticket_number);
 CREATE INDEX IF NOT EXISTS idx_comments_ticket ON comments(ticket_id);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_attachments_ticket ON attachments(ticket_id);
 `;
 
 const SEED = `

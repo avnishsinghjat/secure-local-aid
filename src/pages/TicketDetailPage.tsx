@@ -6,12 +6,15 @@ import { notifyTicketStatusChange, notifyNewComment, notifyTicketAssignment } fr
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
 import SlaIndicator from '@/components/SlaIndicator';
+import TicketEditDialog from '@/components/TicketEditDialog';
+import TicketDeleteDialog from '@/components/TicketDeleteDialog';
+import TicketAttachments from '@/components/TicketAttachments';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
-import { ArrowLeft, Send, Clock, User, MessageSquare, Shield } from 'lucide-react';
+import { ArrowLeft, Send, Clock, MessageSquare } from 'lucide-react';
 
 interface TicketDetail {
   id: number; ticket_number: string; title: string; description: string;
@@ -109,7 +112,6 @@ export default function TicketDetailPage() {
       "INSERT INTO audit_log (entity_type, entity_id, action, user_id, details) VALUES ('ticket', ?, 'comment_added', ?, ?)",
       [Number(id), user!.id, isInternal ? 'Internal note added' : 'Comment added']
     );
-    // Get requester & assignee ids for notification
     const tkt = await runQuery('SELECT requester_id, assigned_user_id FROM tickets WHERE id = ?', [Number(id)]);
     if (tkt[0]) {
       await notifyNewComment(Number(id), ticket.ticket_number, user!.id, tkt[0].requester_id, tkt[0].assigned_user_id, isInternal);
@@ -157,6 +159,7 @@ export default function TicketDetailPage() {
   if (!ticket) return <div className="flex items-center justify-center h-64 text-muted-foreground">Loading...</div>;
 
   const canModify = user?.role !== 'unit_user' && user?.role !== 'auditor';
+  const canDelete = user?.role === 'super_admin' || user?.role === 'admin';
   const nextStatuses = STATUS_TRANSITIONS[ticket.status] || [];
 
   return (
@@ -167,13 +170,22 @@ export default function TicketDetailPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-1 flex-wrap">
             <span className="ticket-id text-base">{ticket.ticket_number}</span>
             <StatusBadge status={ticket.status} />
             <PriorityIndicator priority={ticket.priority} />
             <SlaIndicator dueDate={ticket.due_date} status={ticket.status} />
           </div>
           <h2 className="text-lg font-bold text-foreground">{ticket.title}</h2>
+        </div>
+        {/* Edit / Delete buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          {canModify && (
+            <TicketEditDialog ticket={ticket} userId={user!.id} onSaved={load} />
+          )}
+          {canDelete && (
+            <TicketDeleteDialog ticketId={ticket.id} ticketNumber={ticket.ticket_number} onDeleted={() => navigate('/search')} />
+          )}
         </div>
       </div>
 
@@ -189,6 +201,9 @@ export default function TicketDetailPage() {
               {ticket.description}
             </div>
           </div>
+
+          {/* Attachments */}
+          <TicketAttachments ticketId={ticket.id} userId={user!.id} canModify={canModify} />
 
           {/* Comments */}
           <div className="panel">
