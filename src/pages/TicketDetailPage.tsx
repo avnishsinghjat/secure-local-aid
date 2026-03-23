@@ -16,7 +16,7 @@ import { ArrowLeft, Send, Clock, User, MessageSquare, Shield } from 'lucide-reac
 interface TicketDetail {
   id: number; ticket_number: string; title: string; description: string;
   ticket_type: string; status: string; priority: string; severity: string;
-  module: string; sub_module: string; observation_type: string; due_date: string;
+  module: string; sub_module: string; observation_type: string;
   unit: string; due_date: string; created_at: string; updated_at: string;
   resolved_at: string; closed_at: string;
   requester_name: string; requester_role: string;
