@@ -27,6 +27,7 @@ interface TicketRow {
   priority: string;
   unit: string;
   created_at: string;
+  due_date: string;
   requester_name: string;
   assigned_team: string;
 }
