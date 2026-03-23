@@ -42,6 +42,7 @@ function AppLayout() {
           <Route path="/search" element={<TicketListPage mode="all" />} />
           <Route path="/create" element={<CreateTicketPage />} />
           <Route path="/ticket/:id" element={<TicketDetailPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="/audit" element={<AuditLogPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/settings" element={<div className="text-foreground">Settings coming soon</div>} />
