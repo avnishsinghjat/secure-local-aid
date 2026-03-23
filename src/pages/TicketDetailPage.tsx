@@ -143,11 +143,13 @@ export default function TicketDetailPage() {
   };
 
   const assignUser = async (userId: string) => {
+    if (!ticket) return;
     await runExec('UPDATE tickets SET assigned_user_id = ?, updated_at = datetime(\'now\') WHERE id = ?', [Number(userId), Number(id)]);
     await runExec(
       "INSERT INTO audit_log (entity_type, entity_id, action, user_id, details) VALUES ('ticket', ?, 'assigned_user', ?, ?)",
       [Number(id), user!.id, `Assigned to user ${userId}`]
     );
+    await notifyTicketAssignment(Number(id), ticket.ticket_number, Number(userId));
     load();
   };
 
