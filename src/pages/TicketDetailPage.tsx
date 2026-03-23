@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { notifyTicketStatusChange, notifyNewComment, notifyTicketAssignment } from '@/lib/notifications';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
+import SlaIndicator from '@/components/SlaIndicator';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -170,6 +171,7 @@ export default function TicketDetailPage() {
             <span className="ticket-id text-base">{ticket.ticket_number}</span>
             <StatusBadge status={ticket.status} />
             <PriorityIndicator priority={ticket.priority} />
+            <SlaIndicator dueDate={ticket.due_date} status={ticket.status} />
           </div>
           <h2 className="text-lg font-bold text-foreground">{ticket.title}</h2>
         </div>
@@ -270,6 +272,7 @@ export default function TicketDetailPage() {
               <Row label="Module" value={ticket.module || '—'} />
               <Row label="Severity" value={ticket.severity} />
               <Row label="Unit" value={ticket.unit || '—'} />
+              <Row label="Due Date" value={ticket.due_date ? new Date(ticket.due_date).toLocaleDateString() : 'Not set'} />
               <Row label="Requester" value={ticket.requester_name} />
               <Row label="Created" value={new Date(ticket.created_at).toLocaleString()} />
               {ticket.resolved_at && <Row label="Resolved" value={new Date(ticket.resolved_at).toLocaleString()} />}

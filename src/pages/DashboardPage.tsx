@@ -4,9 +4,10 @@ import { runQuery } from '@/lib/database';
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
+import SlaIndicator from '@/components/SlaIndicator';
 import {
   Ticket, AlertTriangle, Clock, CheckCircle2,
-  ArrowUpRight, Users, BarChart3
+  ArrowUpRight, Users, Timer
 } from 'lucide-react';
 
 interface Stats {
@@ -16,6 +17,7 @@ interface Stats {
   resolved: number;
   myTickets: number;
   unassigned: number;
+  overdue: number;
 }
 
 interface TicketRow {
@@ -26,6 +28,7 @@ interface TicketRow {
   priority: string;
   unit: string;
   created_at: string;
+  due_date: string;
   requester_name: string;
   assigned_team: string;
 }
@@ -33,7 +36,7 @@ interface TicketRow {
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<Stats>({ total: 0, open: 0, critical: 0, resolved: 0, myTickets: 0, unassigned: 0 });
+  const [stats, setStats] = useState<Stats>({ total: 0, open: 0, critical: 0, resolved: 0, myTickets: 0, unassigned: 0, overdue: 0 });
   const [recentTickets, setRecentTickets] = useState<TicketRow[]>([]);
 
   useEffect(() => {
@@ -44,14 +47,15 @@ export default function DashboardPage() {
       const [resolved] = await runQuery("SELECT COUNT(*) as c FROM tickets WHERE status = 'resolved'");
       const [mine] = await runQuery('SELECT COUNT(*) as c FROM tickets WHERE requester_id = ? OR assigned_user_id = ?', [user!.id, user!.id]);
       const [unassigned] = await runQuery('SELECT COUNT(*) as c FROM tickets WHERE assigned_team_id IS NULL AND assigned_user_id IS NULL AND status NOT IN (\'draft\',\'closed\',\'rejected\')');
+      const [overdue] = await runQuery("SELECT COUNT(*) as c FROM tickets WHERE due_date < date('now') AND status NOT IN ('closed','resolved','rejected')");
 
       setStats({
         total: total.c, open: open.c, critical: critical.c,
-        resolved: resolved.c, myTickets: mine.c, unassigned: unassigned.c,
+        resolved: resolved.c, myTickets: mine.c, unassigned: unassigned.c, overdue: overdue.c,
       });
 
       const recent = await runQuery(`
-        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at,
+        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at, t.due_date,
                u.display_name as requester_name,
                COALESCE(tm.name, 'Unassigned') as assigned_team
         FROM tickets t
@@ -70,6 +74,7 @@ export default function DashboardPage() {
     { label: 'Critical', value: stats.critical, icon: AlertTriangle, color: 'text-critical' },
     { label: 'Resolved', value: stats.resolved, icon: CheckCircle2, color: 'text-success' },
     { label: 'My Tickets', value: stats.myTickets, icon: Clock, color: 'text-primary' },
+    { label: 'Overdue', value: stats.overdue, icon: Timer, color: 'text-critical' },
     { label: 'Unassigned', value: stats.unassigned, icon: Users, color: 'text-warning' },
   ];
 
@@ -81,7 +86,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {statCards.map((s) => (
           <div key={s.label} className="stat-card">
             <div className="flex items-center justify-between mb-2">
@@ -107,6 +112,7 @@ export default function DashboardPage() {
                 <th className="text-left px-4 py-2">Title</th>
                 <th className="text-left px-4 py-2">Status</th>
                 <th className="text-left px-4 py-2">Priority</th>
+                <th className="text-left px-4 py-2">SLA</th>
                 <th className="text-left px-4 py-2">Requester</th>
                 <th className="text-left px-4 py-2">Team</th>
                 <th className="text-left px-4 py-2">Created</th>
@@ -119,6 +125,7 @@ export default function DashboardPage() {
                   <td className="px-4 py-3 text-foreground max-w-[250px] truncate">{t.title}</td>
                   <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                   <td className="px-4 py-3"><PriorityIndicator priority={t.priority} showLabel={false} /></td>
+                  <td className="px-4 py-3"><SlaIndicator dueDate={t.due_date} status={t.status} showLabel compact /></td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.requester_name}</td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.assigned_team}</td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(t.created_at).toLocaleDateString()}</td>

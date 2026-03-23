@@ -4,6 +4,7 @@ import { runQuery } from '@/lib/database';
 import { useAuth } from '@/lib/auth-context';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
+import SlaIndicator from '@/components/SlaIndicator';
 import { Input } from '@/components/ui/input';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
@@ -12,7 +13,7 @@ import { Search, Filter } from 'lucide-react';
 
 interface TicketRow {
   id: number; ticket_number: string; title: string; status: string;
-  priority: string; unit: string; created_at: string;
+  priority: string; unit: string; created_at: string; due_date: string;
   requester_name: string; assigned_team: string; ticket_type: string;
 }
 
@@ -47,7 +48,7 @@ export default function TicketListPage({ mode }: Props) {
       }
 
       const results = await runQuery(`
-        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at, t.ticket_type,
+        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at, t.due_date, t.ticket_type,
                u.display_name as requester_name,
                COALESCE(tm.name, 'Unassigned') as assigned_team
         FROM tickets t
@@ -108,6 +109,7 @@ export default function TicketListPage({ mode }: Props) {
                 <th className="text-left px-4 py-2">Type</th>
                 <th className="text-left px-4 py-2">Status</th>
                 <th className="text-left px-4 py-2">Priority</th>
+                <th className="text-left px-4 py-2">SLA</th>
                 <th className="text-left px-4 py-2">Requester</th>
                 <th className="text-left px-4 py-2">Unit</th>
                 <th className="text-left px-4 py-2">Team</th>
@@ -122,6 +124,7 @@ export default function TicketListPage({ mode }: Props) {
                   <td className="px-4 py-3 text-xs text-secondary-foreground capitalize">{t.ticket_type.replace(/_/g, ' ')}</td>
                   <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                   <td className="px-4 py-3"><PriorityIndicator priority={t.priority} showLabel={false} /></td>
+                  <td className="px-4 py-3"><SlaIndicator dueDate={t.due_date} status={t.status} showLabel compact /></td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.requester_name}</td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.unit}</td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.assigned_team}</td>
@@ -129,7 +132,7 @@ export default function TicketListPage({ mode }: Props) {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">No tickets found.</td></tr>
+                <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No tickets found.</td></tr>
               )}
             </tbody>
           </table>
