@@ -99,7 +99,7 @@ export default function TicketDetailPage() {
   useEffect(() => { load(); }, [id]);
 
   const addComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !ticket) return;
     await runExec(
       'INSERT INTO comments (ticket_id, user_id, content, is_internal) VALUES (?, ?, ?, ?)',
       [Number(id), user!.id, newComment, isInternal ? 1 : 0]
@@ -108,6 +108,11 @@ export default function TicketDetailPage() {
       "INSERT INTO audit_log (entity_type, entity_id, action, user_id, details) VALUES ('ticket', ?, 'comment_added', ?, ?)",
       [Number(id), user!.id, isInternal ? 'Internal note added' : 'Comment added']
     );
+    // Get requester & assignee ids for notification
+    const tkt = await runQuery('SELECT requester_id, assigned_user_id FROM tickets WHERE id = ?', [Number(id)]);
+    if (tkt[0]) {
+      await notifyNewComment(Number(id), ticket.ticket_number, user!.id, tkt[0].requester_id, tkt[0].assigned_user_id, isInternal);
+    }
     setNewComment('');
     load();
   };
