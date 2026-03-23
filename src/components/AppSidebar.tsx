@@ -2,7 +2,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Ticket, Inbox, Users, ClipboardList,
-  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3
+  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download
 } from 'lucide-react';
 
 const navItems = [
