@@ -108,6 +108,25 @@ CREATE TABLE IF NOT EXISTS attachments (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS kb_documents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL DEFAULT 'General',
+  doc_type TEXT NOT NULL DEFAULT 'SOP',
+  filename TEXT NOT NULL,
+  mime_type TEXT DEFAULT 'application/octet-stream',
+  size INTEGER DEFAULT 0,
+  data_b64 TEXT,
+  tags TEXT,
+  uploaded_by INTEGER NOT NULL,
+  version TEXT DEFAULT '1.0',
+  status TEXT DEFAULT 'active',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (uploaded_by) REFERENCES users(id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
 CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority);
 CREATE INDEX IF NOT EXISTS idx_tickets_requester ON tickets(requester_id);
@@ -118,6 +137,9 @@ CREATE INDEX IF NOT EXISTS idx_comments_ticket ON comments(ticket_id);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_attachments_ticket ON attachments(ticket_id);
+CREATE INDEX IF NOT EXISTS idx_kb_category ON kb_documents(category);
+CREATE INDEX IF NOT EXISTS idx_kb_type ON kb_documents(doc_type);
+CREATE INDEX IF NOT EXISTS idx_kb_status ON kb_documents(status);
 `;
 
 const SEED = `

@@ -52,6 +52,7 @@ function AppLayout() {
           <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/export" element={<ExportPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
