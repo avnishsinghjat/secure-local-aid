@@ -109,6 +109,7 @@ export default function TicketListPage({ mode }: Props) {
                 <th className="text-left px-4 py-2">Type</th>
                 <th className="text-left px-4 py-2">Status</th>
                 <th className="text-left px-4 py-2">Priority</th>
+                <th className="text-left px-4 py-2">SLA</th>
                 <th className="text-left px-4 py-2">Requester</th>
                 <th className="text-left px-4 py-2">Unit</th>
                 <th className="text-left px-4 py-2">Team</th>
