@@ -17,6 +17,7 @@ import ReportsPage from "@/pages/ReportsPage";
 import ExportPage from "@/pages/ExportPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import SettingsPage from "@/pages/SettingsPage";
+import KnowledgeBasePage from "@/pages/KnowledgeBasePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
