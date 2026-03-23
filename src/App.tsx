@@ -42,7 +42,7 @@ function AppLayout() {
           <Route path="/create" element={<CreateTicketPage />} />
           <Route path="/ticket/:id" element={<TicketDetailPage />} />
           <Route path="/audit" element={<AuditLogPage />} />
-          <Route path="/admin/users" element={<div className="text-foreground">User management coming soon</div>} />
+          <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/settings" element={<div className="text-foreground">Settings coming soon</div>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
