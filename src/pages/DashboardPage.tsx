@@ -125,6 +125,7 @@ export default function DashboardPage() {
                   <td className="px-4 py-3 text-foreground max-w-[250px] truncate">{t.title}</td>
                   <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                   <td className="px-4 py-3"><PriorityIndicator priority={t.priority} showLabel={false} /></td>
+                  <td className="px-4 py-3"><SlaIndicator dueDate={t.due_date} status={t.status} showLabel compact /></td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.requester_name}</td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.assigned_team}</td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">{new Date(t.created_at).toLocaleDateString()}</td>

@@ -171,6 +171,7 @@ export default function TicketDetailPage() {
             <span className="ticket-id text-base">{ticket.ticket_number}</span>
             <StatusBadge status={ticket.status} />
             <PriorityIndicator priority={ticket.priority} />
+            <SlaIndicator dueDate={ticket.due_date} status={ticket.status} />
           </div>
           <h2 className="text-lg font-bold text-foreground">{ticket.title}</h2>
         </div>
