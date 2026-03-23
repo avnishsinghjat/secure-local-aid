@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { runQuery, runExec } from '@/lib/database';
-import { extractText, chunkText } from '@/lib/document-processor';
+import { extractText, chunkText, type ExtractionProgress } from '@/lib/document-processor';
 import { storeEmbeddings, deleteDocumentEmbeddings, hasEmbeddings, getTotalChunks } from '@/lib/vector-store';
 import { createEmbeddings, getLMStudioConfig } from '@/lib/lmstudio';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   BookOpen, Upload, Search, FileText, Download, Trash2, Eye,
   Plus, Filter, Tag, Clock, User, File, X, Brain, CheckCircle2,
-  AlertCircle, Loader2, Cpu, Layers
+  AlertCircle, Loader2, Cpu, Layers, ScanLine, ImageIcon
 } from 'lucide-react';
 
 interface KBDocument {
@@ -45,6 +45,7 @@ interface KBDocument {
 }
 
 type EmbedStatus = 'none' | 'processing' | 'done' | 'error';
+type ProcessingStage = 'extracting' | 'ocr' | 'embedding';
 
 const DOC_TYPES = ['SOP', 'Manual', 'Policy', 'Guideline', 'Procedure', 'Reference', 'Training Material'];
 const CATEGORIES = [
@@ -62,7 +63,7 @@ export default function KnowledgeBasePage() {
   const [showUpload, setShowUpload] = useState(false);
   const [viewDoc, setViewDoc] = useState<KBDocument | null>(null);
   const [embedStatus, setEmbedStatus] = useState<Record<number, EmbedStatus>>({});
-  const [embedProgress, setEmbedProgress] = useState<Record<number, { done: number; total: number }>>({});
+  const [embedProgress, setEmbedProgress] = useState<Record<number, { done: number; total: number; stage?: ProcessingStage; detail?: string }>>({}); 
   const [totalChunks, setTotalChunks] = useState(0);
 
   // Upload form state
@@ -111,32 +112,42 @@ export default function KnowledgeBasePage() {
     setEmbedProgress((p) => ({ ...p, [doc.id]: { done: 0, total: 0 } }));
 
     try {
-      // Get file data
+      const ocrProgress = (progress: ExtractionProgress) => {
+        setEmbedProgress((p) => ({
+          ...p,
+          [doc.id]: {
+            done: progress.current,
+            total: progress.total,
+            stage: progress.stage,
+            detail: progress.detail,
+          },
+        }));
+      };
+
       let textContent = '';
       if (fileObj) {
-        textContent = await extractText(fileObj);
+        textContent = await extractText(fileObj, ocrProgress);
       } else if (doc.data_b64) {
-        // Reconstruct File from b64
         const byteChars = atob(doc.data_b64);
         const bytes = new Uint8Array(byteChars.length);
         for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
         const blob = new Blob([bytes], { type: doc.mime_type });
         const reconstructed = new File([blob], doc.filename, { type: doc.mime_type });
-        textContent = await extractText(reconstructed);
+        textContent = await extractText(reconstructed, ocrProgress);
       }
 
       if (!textContent.trim()) {
-        throw new Error('No text could be extracted from this file. Check that the file contains readable text.');
+        throw new Error('No text could be extracted from this file. The document may be empty or the image too low-quality for OCR.');
       }
 
       const chunks = chunkText(textContent);
       if (chunks.length === 0) throw new Error('No text chunks generated from document.');
 
-      setEmbedProgress((p) => ({ ...p, [doc.id]: { done: 0, total: chunks.length } }));
+      setEmbedProgress((p) => ({ ...p, [doc.id]: { done: 0, total: chunks.length, stage: 'embedding' } }));
 
       const config = getLMStudioConfig();
       const embeddings = await createEmbeddings(chunks, config, (done, total) => {
-        setEmbedProgress((p) => ({ ...p, [doc.id]: { done, total } }));
+        setEmbedProgress((p) => ({ ...p, [doc.id]: { done, total, stage: 'embedding' } }));
       });
 
       await storeEmbeddings(doc.id, chunks, embeddings, {
@@ -304,7 +315,7 @@ export default function KnowledgeBasePage() {
             <Cpu className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <div className="flex-1 text-sm">
               <span className="font-medium text-foreground">{documents.length - processedCount} document(s) not yet processed for AI search.</span>
-              <span className="text-muted-foreground ml-1">Click the brain icon next to each document to generate embeddings via Local AI.</span>
+              <span className="text-muted-foreground ml-1">Click the brain icon next to each document to extract text (with OCR for scanned docs/images) and generate embeddings via Local AI.</span>
             </div>
           </CardContent>
         </Card>
@@ -415,11 +426,23 @@ export default function KnowledgeBasePage() {
                           </div>
                         )}
                         {status === 'processing' && (
-                          <div className="space-y-1 min-w-[80px]">
+                          <div className="space-y-1 min-w-[100px]">
                             <div className="flex items-center gap-1 text-xs text-primary">
-                              <Loader2 className="w-3 h-3 animate-spin" />
+                              {progress?.stage === 'ocr' ? (
+                                <ScanLine className="w-3 h-3 animate-pulse" />
+                              ) : (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              )}
                               <span>
-                                {progress ? `${progress.done}/${progress.total}` : 'Extracting...'}
+                                {progress?.detail
+                                  ? progress.detail
+                                  : progress?.stage === 'ocr'
+                                    ? `OCR ${progress.done}/${progress.total}`
+                                    : progress?.stage === 'embedding'
+                                      ? `Embedding ${progress.done}/${progress.total}`
+                                      : progress
+                                        ? `Extracting ${progress.done}/${progress.total}`
+                                        : 'Starting...'}
                               </span>
                             </div>
                             {progress && progress.total > 0 && (
@@ -538,9 +561,16 @@ export default function KnowledgeBasePage() {
               <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
                 {file ? (
                   <div className="flex items-center justify-center gap-2">
-                    <FileText className="w-4 h-4 text-primary" />
+                    {/\.(png|jpe?g|tiff?|bmp|webp|gif)$/i.test(file.name)
+                      ? <ImageIcon className="w-4 h-4 text-primary" />
+                      : <FileText className="w-4 h-4 text-primary" />}
                     <span className="text-sm text-foreground">{file.name}</span>
                     <span className="text-xs text-muted-foreground">({formatSize(file.size)})</span>
+                    {/\.(png|jpe?g|tiff?|bmp|webp|gif)$/i.test(file.name) && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/30 text-primary">
+                        <ScanLine className="w-2.5 h-2.5 mr-0.5" /> OCR
+                      </Badge>
+                    )}
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setFile(null)}>
                       <X className="w-3 h-3" />
                     </Button>
@@ -549,8 +579,13 @@ export default function KnowledgeBasePage() {
                   <label className="cursor-pointer">
                     <Upload className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">Click to select a file</p>
-                    <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, TXT, MD, etc.</p>
-                    <input type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                    <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, TXT, MD, or images (PNG, JPG, TIFF — OCR enabled)</p>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.docx,.txt,.md,.csv,.json,.xml,.png,.jpg,.jpeg,.tiff,.tif,.bmp,.webp,.gif"
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    />
                   </label>
                 )}
               </div>
