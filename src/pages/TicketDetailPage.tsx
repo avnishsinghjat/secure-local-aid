@@ -272,6 +272,7 @@ export default function TicketDetailPage() {
               <Row label="Module" value={ticket.module || '—'} />
               <Row label="Severity" value={ticket.severity} />
               <Row label="Unit" value={ticket.unit || '—'} />
+              <Row label="Due Date" value={ticket.due_date ? new Date(ticket.due_date).toLocaleDateString() : 'Not set'} />
               <Row label="Requester" value={ticket.requester_name} />
               <Row label="Created" value={new Date(ticket.created_at).toLocaleString()} />
               {ticket.resolved_at && <Row label="Resolved" value={new Date(ticket.resolved_at).toLocaleString()} />}
