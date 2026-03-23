@@ -16,6 +16,7 @@ import UserManagementPage from "@/pages/UserManagementPage";
 import ReportsPage from "@/pages/ReportsPage";
 import ExportPage from "@/pages/ExportPage";
 import NotificationsPage from "@/pages/NotificationsPage";
+import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
