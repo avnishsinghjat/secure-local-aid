@@ -342,7 +342,7 @@ export default function SettingsPage() {
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   {[
-                    ['Application', 'SENTINEL Ticketing System'],
+                    ['Application', 'TICKETDESK Ticketing System'],
                     ['Storage', 'SQLite (IndexedDB)'],
                     ['Theme', theme === 'dark' ? 'Dark' : 'Light'],
                     ['Logged in as', user?.display_name || ''],

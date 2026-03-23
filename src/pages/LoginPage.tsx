@@ -71,7 +71,7 @@ export default function LoginPage() {
           <div className="w-16 h-16 rounded-lg bg-primary mx-auto mb-4 flex items-center justify-center">
             <Shield className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground tracking-wide">SENTINEL</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-wide">TICKETDESK</h1>
           <p className="text-xs text-muted-foreground tracking-[0.3em] uppercase mt-1">Secure Ticketing System</p>
         </div>
 

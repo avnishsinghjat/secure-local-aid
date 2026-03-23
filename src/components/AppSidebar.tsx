@@ -69,7 +69,7 @@ export default function AppSidebar() {
             <Shield className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="flex-1">
-            <h1 className="text-sm font-bold text-foreground tracking-wide">SENTINEL</h1>
+            <h1 className="text-sm font-bold text-foreground tracking-wide">TICKETDESK</h1>
             <p className="text-[10px] text-muted-foreground tracking-widest uppercase">Ticketing System</p>
           </div>
           <button onClick={toggleTheme} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-secondary">
