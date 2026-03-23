@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { runQuery, runExec } from '@/lib/database';
 import { useAuth } from '@/lib/auth-context';
+import { notifyTicketStatusChange, notifyNewComment, notifyTicketAssignment } from '@/lib/notifications';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
 import { Button } from '@/components/ui/button';
@@ -98,7 +99,7 @@ export default function TicketDetailPage() {
   useEffect(() => { load(); }, [id]);
 
   const addComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !ticket) return;
     await runExec(
       'INSERT INTO comments (ticket_id, user_id, content, is_internal) VALUES (?, ?, ?, ?)',
       [Number(id), user!.id, newComment, isInternal ? 1 : 0]
@@ -107,11 +108,17 @@ export default function TicketDetailPage() {
       "INSERT INTO audit_log (entity_type, entity_id, action, user_id, details) VALUES ('ticket', ?, 'comment_added', ?, ?)",
       [Number(id), user!.id, isInternal ? 'Internal note added' : 'Comment added']
     );
+    // Get requester & assignee ids for notification
+    const tkt = await runQuery('SELECT requester_id, assigned_user_id FROM tickets WHERE id = ?', [Number(id)]);
+    if (tkt[0]) {
+      await notifyNewComment(Number(id), ticket.ticket_number, user!.id, tkt[0].requester_id, tkt[0].assigned_user_id, isInternal);
+    }
     setNewComment('');
     load();
   };
 
   const changeStatus = async (newStatus: string) => {
+    if (!ticket) return;
     await runExec('UPDATE tickets SET status = ?, updated_at = datetime(\'now\') WHERE id = ?', [newStatus, Number(id)]);
     if (newStatus === 'resolved') await runExec("UPDATE tickets SET resolved_at = datetime('now') WHERE id = ?", [Number(id)]);
     if (newStatus === 'closed') await runExec("UPDATE tickets SET closed_at = datetime('now') WHERE id = ?", [Number(id)]);
@@ -119,6 +126,10 @@ export default function TicketDetailPage() {
       "INSERT INTO audit_log (entity_type, entity_id, action, user_id, details) VALUES ('ticket', ?, 'status_changed', ?, ?)",
       [Number(id), user!.id, `Status changed to ${newStatus}`]
     );
+    const tkt = await runQuery('SELECT requester_id, assigned_user_id FROM tickets WHERE id = ?', [Number(id)]);
+    if (tkt[0]) {
+      await notifyTicketStatusChange(Number(id), ticket.ticket_number, newStatus, tkt[0].requester_id, tkt[0].assigned_user_id);
+    }
     load();
   };
 
@@ -132,11 +143,13 @@ export default function TicketDetailPage() {
   };
 
   const assignUser = async (userId: string) => {
+    if (!ticket) return;
     await runExec('UPDATE tickets SET assigned_user_id = ?, updated_at = datetime(\'now\') WHERE id = ?', [Number(userId), Number(id)]);
     await runExec(
       "INSERT INTO audit_log (entity_type, entity_id, action, user_id, details) VALUES ('ticket', ?, 'assigned_user', ?, ?)",
       [Number(id), user!.id, `Assigned to user ${userId}`]
     );
+    await notifyTicketAssignment(Number(id), ticket.ticket_number, Number(userId));
     load();
   };
 

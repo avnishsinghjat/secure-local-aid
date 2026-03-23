@@ -14,6 +14,7 @@ import AuditLogPage from "@/pages/AuditLogPage";
 import UserManagementPage from "@/pages/UserManagementPage";
 import ReportsPage from "@/pages/ReportsPage";
 import ExportPage from "@/pages/ExportPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ function AppLayout() {
           <Route path="/audit" element={<AuditLogPage />} />
           <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="/export" element={<ExportPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<div className="text-foreground">Settings coming soon</div>} />
           <Route path="*" element={<NotFound />} />
         </Routes>

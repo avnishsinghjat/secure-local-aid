@@ -1,9 +1,11 @@
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Ticket, Inbox, Users, ClipboardList,
   Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download
 } from 'lucide-react';
+import { getUnreadCount } from '@/lib/notifications';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/', roles: 'all' },
@@ -23,6 +25,19 @@ export default function AppSidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [unread, setUnread] = useState(0);
+
+  const refreshUnread = useCallback(async () => {
+    if (!user) return;
+    const c = await getUnreadCount(user.id);
+    setUnread(c);
+  }, [user]);
+
+  useEffect(() => {
+    refreshUnread();
+    const interval = setInterval(refreshUnread, 5000);
+    return () => clearInterval(interval);
+  }, [refreshUnread]);
 
   if (!user) return null;
 
@@ -39,6 +54,8 @@ export default function AppSidebar() {
     unit_user: 'UNIT USER',
     auditor: 'AUDITOR',
   };
+
+  const isNotifActive = location.pathname === '/notifications';
 
   return (
     <aside className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col shrink-0">
@@ -57,6 +74,29 @@ export default function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {/* Notifications link */}
+        <button
+          onClick={() => navigate('/notifications')}
+          className={`nav-item w-full text-left ${isNotifActive ? 'nav-item-active' : ''}`}
+        >
+          <div className="relative">
+            <Bell className="w-4 h-4 shrink-0" />
+            {unread > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center px-1">
+                {unread > 99 ? '99+' : unread}
+              </span>
+            )}
+          </div>
+          <span>Notifications</span>
+          {unread > 0 && (
+            <span className="ml-auto text-[10px] bg-destructive/20 text-destructive px-1.5 py-0.5 rounded font-mono">
+              {unread}
+            </span>
+          )}
+        </button>
+
+        <div className="h-px bg-sidebar-border my-2" />
+
         {filteredNav.map((item) => {
           const active = location.pathname === item.path;
           return (
