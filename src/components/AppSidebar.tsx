@@ -2,7 +2,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Ticket, Inbox, Users, ClipboardList,
-  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3
+  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download
 } from 'lucide-react';
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { icon: FileText, label: 'Create Ticket', path: '/create', roles: 'unit_user,super_admin,admin,g1_triage' },
   { icon: Users, label: 'Users & Teams', path: '/admin/users', roles: 'super_admin,admin' },
   { icon: BarChart3, label: 'Reports', path: '/reports', roles: 'super_admin,admin,auditor' },
+  { icon: Download, label: 'Export', path: '/export', roles: 'super_admin,admin,auditor' },
   { icon: Shield, label: 'Audit Log', path: '/audit', roles: 'super_admin,auditor' },
   { icon: Settings, label: 'Settings', path: '/settings', roles: 'super_admin' },
 ];
