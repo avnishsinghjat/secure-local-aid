@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { notifyTicketStatusChange, notifyNewComment, notifyTicketAssignment } from '@/lib/notifications';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
+import SlaIndicator from '@/components/SlaIndicator';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
