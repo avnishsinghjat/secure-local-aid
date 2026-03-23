@@ -124,6 +124,7 @@ export default function TicketListPage({ mode }: Props) {
                   <td className="px-4 py-3 text-xs text-secondary-foreground capitalize">{t.ticket_type.replace(/_/g, ' ')}</td>
                   <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                   <td className="px-4 py-3"><PriorityIndicator priority={t.priority} showLabel={false} /></td>
+                  <td className="px-4 py-3"><SlaIndicator dueDate={t.due_date} status={t.status} showLabel compact /></td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.requester_name}</td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.unit}</td>
                   <td className="px-4 py-3 text-secondary-foreground">{t.assigned_team}</td>
