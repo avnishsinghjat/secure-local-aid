@@ -4,7 +4,7 @@ import { useTheme } from '@/lib/theme-context';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Ticket, Inbox, Users, ClipboardList,
-  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download, Sun, Moon
+  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download, Sun, Moon, BookOpen
 } from 'lucide-react';
 import { getUnreadCount } from '@/lib/notifications';
 
@@ -18,6 +18,7 @@ const navItems = [
   { icon: Users, label: 'Users & Teams', path: '/admin/users', roles: 'super_admin,admin' },
   { icon: BarChart3, label: 'Reports', path: '/reports', roles: 'super_admin,admin,auditor' },
   { icon: Download, label: 'Export', path: '/export', roles: 'super_admin,admin,auditor' },
+  { icon: BookOpen, label: 'Knowledge Base', path: '/knowledge-base', roles: 'all' },
   { icon: Shield, label: 'Audit Log', path: '/audit', roles: 'super_admin,auditor' },
   { icon: Settings, label: 'Settings', path: '/settings', roles: 'super_admin' },
 ];
