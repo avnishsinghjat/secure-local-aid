@@ -48,7 +48,7 @@ export default function TicketListPage({ mode }: Props) {
       }
 
       const results = await runQuery(`
-        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at, t.ticket_type,
+        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at, t.due_date, t.ticket_type,
                u.display_name as requester_name,
                COALESCE(tm.name, 'Unassigned') as assigned_team
         FROM tickets t
