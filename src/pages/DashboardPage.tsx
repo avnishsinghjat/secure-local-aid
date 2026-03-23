@@ -36,7 +36,7 @@ interface TicketRow {
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<Stats>({ total: 0, open: 0, critical: 0, resolved: 0, myTickets: 0, unassigned: 0 });
+  const [stats, setStats] = useState<Stats>({ total: 0, open: 0, critical: 0, resolved: 0, myTickets: 0, unassigned: 0, overdue: 0 });
   const [recentTickets, setRecentTickets] = useState<TicketRow[]>([]);
 
   useEffect(() => {
