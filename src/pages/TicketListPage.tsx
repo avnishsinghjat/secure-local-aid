@@ -13,7 +13,7 @@ import { Search, Filter } from 'lucide-react';
 
 interface TicketRow {
   id: number; ticket_number: string; title: string; status: string;
-  priority: string; unit: string; created_at: string;
+  priority: string; unit: string; created_at: string; due_date: string;
   requester_name: string; assigned_team: string; ticket_type: string;
 }
 
