@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { runQuery, runExec } from '@/lib/database';
 import { useAuth } from '@/lib/auth-context';
+import { notifyTicketStatusChange, notifyNewComment, notifyTicketAssignment } from '@/lib/notifications';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
 import { Button } from '@/components/ui/button';
