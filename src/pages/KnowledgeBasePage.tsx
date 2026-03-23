@@ -158,7 +158,7 @@ export default function KnowledgeBasePage() {
       toast({
         title: 'Processing failed',
         description: isConn
-          ? 'Cannot connect to LM Studio. Ensure it is running with an embedding model loaded.'
+          ? 'Cannot connect to Local AI. Ensure it is running with an embedding model loaded.'
           : msg,
         variant: 'destructive',
       });
@@ -304,7 +304,7 @@ export default function KnowledgeBasePage() {
             <Cpu className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <div className="flex-1 text-sm">
               <span className="font-medium text-foreground">{documents.length - processedCount} document(s) not yet processed for AI search.</span>
-              <span className="text-muted-foreground ml-1">Click the brain icon next to each document to generate embeddings via LM Studio.</span>
+              <span className="text-muted-foreground ml-1">Click the brain icon next to each document to generate embeddings via Local AI.</span>
             </div>
           </CardContent>
         </Card>
@@ -563,7 +563,7 @@ export default function KnowledgeBasePage() {
                 className="rounded"
               />
               <Brain className="w-3.5 h-3.5 text-primary" />
-              <span className="text-foreground">Process embeddings after upload (requires LM Studio)</span>
+              <span className="text-foreground">Process embeddings after upload (requires Local AI)</span>
             </label>
           </div>
           <DialogFooter>

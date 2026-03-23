@@ -51,7 +51,7 @@ export async function chatCompletion(
 
   if (!response.ok) {
     const text = await response.text().catch(() => '');
-    throw new Error(`LM Studio error ${response.status}: ${text}`);
+    throw new Error(`Local AI error ${response.status}: ${text}`);
   }
   const data = await response.json();
   return data.choices?.[0]?.message?.content ?? '';
@@ -80,7 +80,7 @@ export async function streamChatCompletion(
   });
 
   if (!response.ok) {
-    throw new Error(`LM Studio error ${response.status}`);
+    throw new Error(`Local AI error ${response.status}`);
   }
 
   const reader = response.body!.getReader();

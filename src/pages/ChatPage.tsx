@@ -103,7 +103,7 @@ export default function ChatPage() {
             id: crypto.randomUUID(),
             role: 'assistant',
             content: isConnection
-              ? `Cannot connect to LM Studio. Please ensure:\n1. LM Studio is running\n2. A model is loaded\n3. The server is started (port 1234)\n4. Base URL is set correctly in Settings\n\nError: ${errMsg}`
+              ? `Cannot connect to Local AI. Please ensure:\n1. Local AI is running\n2. A model is loaded\n3. The server is started (port 1234)\n4. Base URL is set correctly in Settings\n\nError: ${errMsg}`
               : `Error: ${errMsg}`,
             error: true,
             timestamp: new Date(),
@@ -146,7 +146,7 @@ export default function ChatPage() {
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">AI Assistant</h1>
             <p className="text-xs text-muted-foreground">
-              Powered by LM Studio &middot; {config.baseUrl}
+              Powered by Local AI &middot; {config.baseUrl}
             </p>
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function ChatPage() {
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-1">Ask anything about your system</h2>
               <p className="text-sm text-muted-foreground max-w-md">
-                Query your ticket database, search knowledge base documents, or ask general questions. All processing is local via LM Studio.
+                Query your ticket database, search knowledge base documents, or ask general questions. All processing is local via Local AI.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 w-full max-w-lg">
@@ -392,7 +392,7 @@ export default function ChatPage() {
           </Button>
         </div>
         <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-          All queries processed locally via LM Studio &middot; No data leaves your machine
+          All queries processed locally via Local AI &middot; No data leaves your machine
         </p>
       </div>
     </div>

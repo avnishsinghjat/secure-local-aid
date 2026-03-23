@@ -44,7 +44,7 @@ export default function SettingsPage() {
 
   const isSuperAdmin = user?.role === 'super_admin';
 
-  // LM Studio state
+  // Local AI state
   const [lmConfig, setLmConfig] = useState<LMStudioConfig>(() => getLMStudioConfig());
   const [lmTesting, setLmTesting] = useState(false);
   const [lmStatus, setLmStatus] = useState<{ ok: boolean; models: string[] } | null>(null);
@@ -65,7 +65,7 @@ export default function SettingsPage() {
 
   const handleSaveLMConfig = () => {
     saveLMStudioConfig(lmConfig);
-    toast({ title: 'LM Studio settings saved', description: 'Configuration saved locally.' });
+    toast({ title: 'Local AI settings saved', description: 'Configuration saved locally.' });
   };
 
   const handleClearEmbeddings = async () => {
@@ -152,7 +152,7 @@ export default function SettingsPage() {
           <TabsTrigger value="appearance" className="gap-1.5"><Palette className="w-3.5 h-3.5" /> Appearance</TabsTrigger>
           <TabsTrigger value="notifications" className="gap-1.5"><Bell className="w-3.5 h-3.5" /> Notifications</TabsTrigger>
           <TabsTrigger value="preferences" className="gap-1.5"><Settings className="w-3.5 h-3.5" /> Preferences</TabsTrigger>
-          <TabsTrigger value="ai" className="gap-1.5"><Cpu className="w-3.5 h-3.5" /> AI / LM Studio</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1.5"><Cpu className="w-3.5 h-3.5" /> AI / Local AI</TabsTrigger>
           {isSuperAdmin && (
             <TabsTrigger value="system" className="gap-1.5"><Shield className="w-3.5 h-3.5" /> System</TabsTrigger>
           )}
@@ -330,15 +330,15 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* AI / LM Studio Tab */}
+        {/* AI / Local AI Tab */}
         <TabsContent value="ai" className="space-y-4">
           <Card className="border-border">
             <CardHeader>
               <CardTitle className="text-foreground flex items-center gap-2">
-                <Cpu className="w-4 h-4" /> LM Studio Connection
+                <Cpu className="w-4 h-4" /> Local AI Connection
               </CardTitle>
               <CardDescription>
-                Configure your local LM Studio instance for AI features. All processing runs offline.
+                Configure your local AI instance for AI features. All processing runs offline.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -352,7 +352,7 @@ export default function SettingsPage() {
                       <p className="text-xs mt-0.5 opacity-80">{lmStatus.models.length} model(s) available</p>
                     )}
                     {!lmStatus.ok && (
-                      <p className="text-xs mt-0.5 opacity-80">Ensure LM Studio is running with the server started on the configured port.</p>
+                      <p className="text-xs mt-0.5 opacity-80">Ensure Local AI is running with the server started on the configured port.</p>
                     )}
                   </div>
                 </div>
@@ -372,7 +372,7 @@ export default function SettingsPage() {
                     Test
                   </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">Default: http://localhost:1234/v1 (LM Studio default port)</p>
+                <p className="text-xs text-muted-foreground">Default: http://localhost:1234/v1 (common Local AI default port)</p>
               </div>
 
               <Separator />
@@ -432,7 +432,7 @@ export default function SettingsPage() {
               <Separator />
 
               <Button onClick={handleSaveLMConfig} className="gap-2">
-                <Save className="w-4 h-4" /> Save LM Studio Settings
+                <Save className="w-4 h-4" /> Save Local AI Settings
               </Button>
             </CardContent>
           </Card>
@@ -460,7 +460,7 @@ export default function SettingsPage() {
               <div className="p-3 rounded-lg bg-muted/30 space-y-1">
                 <p className="text-xs font-medium text-foreground">How it works</p>
                 <ul className="text-xs text-muted-foreground space-y-0.5">
-                  <li>• Documents are split into chunks and embedded via LM Studio</li>
+                  <li>• Documents are split into chunks and embedded via Local AI</li>
                   <li>• Embeddings are stored locally in your browser (IndexedDB)</li>
                   <li>• No data is sent to any external server</li>
                   <li>• Use the Knowledge Base page to process documents</li>
@@ -500,10 +500,10 @@ export default function SettingsPage() {
             <CardContent>
               <ol className="space-y-2 text-sm text-muted-foreground">
                 {[
-                  'Download and install LM Studio from lmstudio.ai',
-                  'In LM Studio, download a chat model (e.g. Llama 3.2, Mistral, Phi-3)',
+                  'Install and open your Local AI runtime',
+                  'In Local AI, download a chat model (e.g. Llama 3.2, Mistral, Phi-3)',
                   'For document search, also load an embedding model (e.g. nomic-embed-text)',
-                  'Start the local server in LM Studio (port 1234 by default)',
+                  'Start the local server in Local AI (port 1234 by default)',
                   'Use the Test button above to verify the connection',
                   'Go to Knowledge Base and click the brain icon to index documents',
                   'Use the AI Assistant (chat page) to query your data',

@@ -74,7 +74,7 @@ export default function TicketAIPanel({ ticket, comments }: TicketAIPanelProps) 
       const isConn = msg.includes('fetch') || msg.includes('Failed to fetch');
       setError(
         isConn
-          ? 'Cannot connect to LM Studio. Ensure it is running with a model loaded on port 1234.'
+          ? 'Cannot connect to Local AI. Ensure it is running with a model loaded on port 1234.'
           : msg
       );
     } finally {
