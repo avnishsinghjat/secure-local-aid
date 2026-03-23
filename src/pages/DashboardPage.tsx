@@ -4,9 +4,10 @@ import { runQuery } from '@/lib/database';
 import { useNavigate } from 'react-router-dom';
 import StatusBadge from '@/components/StatusBadge';
 import PriorityIndicator from '@/components/PriorityIndicator';
+import SlaIndicator from '@/components/SlaIndicator';
 import {
   Ticket, AlertTriangle, Clock, CheckCircle2,
-  ArrowUpRight, Users, BarChart3
+  ArrowUpRight, Users, Timer
 } from 'lucide-react';
 
 interface Stats {
