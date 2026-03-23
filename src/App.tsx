@@ -12,6 +12,7 @@ import TicketDetailPage from "@/pages/TicketDetailPage";
 import CreateTicketPage from "@/pages/CreateTicketPage";
 import AuditLogPage from "@/pages/AuditLogPage";
 import UserManagementPage from "@/pages/UserManagementPage";
+import ReportsPage from "@/pages/ReportsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
