@@ -112,6 +112,7 @@ export default function DashboardPage() {
                 <th className="text-left px-4 py-2">Title</th>
                 <th className="text-left px-4 py-2">Status</th>
                 <th className="text-left px-4 py-2">Priority</th>
+                <th className="text-left px-4 py-2">SLA</th>
                 <th className="text-left px-4 py-2">Requester</th>
                 <th className="text-left px-4 py-2">Team</th>
                 <th className="text-left px-4 py-2">Created</th>
