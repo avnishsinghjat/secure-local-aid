@@ -9,6 +9,7 @@ import SlaIndicator from '@/components/SlaIndicator';
 import TicketEditDialog from '@/components/TicketEditDialog';
 import TicketDeleteDialog from '@/components/TicketDeleteDialog';
 import TicketAttachments from '@/components/TicketAttachments';
+import TicketAIPanel from '@/components/TicketAIPanel';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -319,6 +320,24 @@ export default function TicketDetailPage() {
               </div>
             </div>
           )}
+
+          {/* AI Analysis Panel */}
+          <TicketAIPanel
+            ticket={{
+              id: ticket.id,
+              title: ticket.title,
+              description: ticket.description,
+              ticketType: ticket.ticket_type,
+              status: ticket.status,
+              priority: ticket.priority,
+              unit: ticket.unit,
+            }}
+            comments={comments.map((c) => ({
+              content: c.content,
+              is_internal: c.is_internal,
+              display_name: c.display_name,
+            }))}
+          />
         </div>
       </div>
     </div>

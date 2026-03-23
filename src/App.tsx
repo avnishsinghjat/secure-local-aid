@@ -18,6 +18,7 @@ import ExportPage from "@/pages/ExportPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import SettingsPage from "@/pages/SettingsPage";
 import KnowledgeBasePage from "@/pages/KnowledgeBasePage";
+import ChatPage from "@/pages/ChatPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ function AppLayout() {
           <Route path="/export" element={<ExportPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useTheme } from '@/lib/theme-context';
 import { runExec, resetDatabase } from '@/lib/database';
+import { getLMStudioConfig, saveLMStudioConfig, testConnection, LMStudioConfig } from '@/lib/lmstudio';
+import { clearAllEmbeddings, getTotalChunks } from '@/lib/vector-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,10 +12,12 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import {
   Settings, Sun, Moon, Shield, Database, Bell, Palette,
-  RotateCcw, Save, User, Lock, AlertTriangle
+  RotateCcw, Save, User, Lock, AlertTriangle, Cpu, CheckCircle2,
+  XCircle, Loader2, Layers, RefreshCw, Wifi
 } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -39,6 +43,38 @@ export default function SettingsPage() {
   const [pageSize, setPageSize] = useState('25');
 
   const isSuperAdmin = user?.role === 'super_admin';
+
+  // LM Studio state
+  const [lmConfig, setLmConfig] = useState<LMStudioConfig>(() => getLMStudioConfig());
+  const [lmTesting, setLmTesting] = useState(false);
+  const [lmStatus, setLmStatus] = useState<{ ok: boolean; models: string[] } | null>(null);
+  const [totalChunks, setTotalChunks] = useState(0);
+  const [clearingEmbeddings, setClearingEmbeddings] = useState(false);
+
+  useEffect(() => {
+    getTotalChunks().then(setTotalChunks);
+  }, []);
+
+  const handleTestConnection = async () => {
+    setLmTesting(true);
+    setLmStatus(null);
+    const result = await testConnection(lmConfig.baseUrl);
+    setLmStatus(result);
+    setLmTesting(false);
+  };
+
+  const handleSaveLMConfig = () => {
+    saveLMStudioConfig(lmConfig);
+    toast({ title: 'LM Studio settings saved', description: 'Configuration saved locally.' });
+  };
+
+  const handleClearEmbeddings = async () => {
+    setClearingEmbeddings(true);
+    await clearAllEmbeddings();
+    setTotalChunks(0);
+    setClearingEmbeddings(false);
+    toast({ title: 'Embeddings cleared', description: 'All vector embeddings have been deleted from local storage.' });
+  };
 
   const handleUpdateProfile = async () => {
     if (!user || !displayName.trim()) return;
@@ -111,11 +147,12 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-4">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto gap-1">
           <TabsTrigger value="profile" className="gap-1.5"><User className="w-3.5 h-3.5" /> Profile</TabsTrigger>
           <TabsTrigger value="appearance" className="gap-1.5"><Palette className="w-3.5 h-3.5" /> Appearance</TabsTrigger>
           <TabsTrigger value="notifications" className="gap-1.5"><Bell className="w-3.5 h-3.5" /> Notifications</TabsTrigger>
           <TabsTrigger value="preferences" className="gap-1.5"><Settings className="w-3.5 h-3.5" /> Preferences</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1.5"><Cpu className="w-3.5 h-3.5" /> AI / LM Studio</TabsTrigger>
           {isSuperAdmin && (
             <TabsTrigger value="system" className="gap-1.5"><Shield className="w-3.5 h-3.5" /> System</TabsTrigger>
           )}
@@ -289,6 +326,196 @@ export default function SettingsPage() {
               <Button onClick={handleSavePreferences} className="gap-2">
                 <Save className="w-4 h-4" /> Save Preferences
               </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* AI / LM Studio Tab */}
+        <TabsContent value="ai" className="space-y-4">
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Cpu className="w-4 h-4" /> LM Studio Connection
+              </CardTitle>
+              <CardDescription>
+                Configure your local LM Studio instance for AI features. All processing runs offline.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {/* Connection status */}
+              {lmStatus && (
+                <div className={`flex items-start gap-2 p-3 rounded-lg border text-sm ${lmStatus.ok ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
+                  {lmStatus.ok ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> : <XCircle className="w-4 h-4 shrink-0 mt-0.5" />}
+                  <div>
+                    <p className="font-medium">{lmStatus.ok ? 'Connected successfully' : 'Connection failed'}</p>
+                    {lmStatus.ok && lmStatus.models.length > 0 && (
+                      <p className="text-xs mt-0.5 opacity-80">{lmStatus.models.length} model(s) available</p>
+                    )}
+                    {!lmStatus.ok && (
+                      <p className="text-xs mt-0.5 opacity-80">Ensure LM Studio is running with the server started on the configured port.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-foreground">Base URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={lmConfig.baseUrl}
+                    onChange={(e) => setLmConfig((p) => ({ ...p, baseUrl: e.target.value }))}
+                    placeholder="http://localhost:1234/v1"
+                    className="font-mono text-sm"
+                  />
+                  <Button variant="outline" onClick={handleTestConnection} disabled={lmTesting} className="gap-2 shrink-0">
+                    {lmTesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wifi className="w-4 h-4" />}
+                    Test
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Default: http://localhost:1234/v1 (LM Studio default port)</p>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-foreground">Chat Model</Label>
+                  <Input
+                    value={lmConfig.chatModel}
+                    onChange={(e) => setLmConfig((p) => ({ ...p, chatModel: e.target.value }))}
+                    placeholder="Leave blank to use the loaded model"
+                    className="font-mono text-sm"
+                  />
+                  {lmStatus?.ok && lmStatus.models.length > 0 && (
+                    <div className="flex gap-1 flex-wrap mt-1">
+                      {lmStatus.models.map((m) => (
+                        <Badge
+                          key={m}
+                          variant="outline"
+                          className="text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setLmConfig((p) => ({ ...p, chatModel: m }))}
+                        >
+                          {m}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">Used for chat, ticket analysis, and SQL generation.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-foreground">Embedding Model</Label>
+                  <Input
+                    value={lmConfig.embeddingModel}
+                    onChange={(e) => setLmConfig((p) => ({ ...p, embeddingModel: e.target.value }))}
+                    placeholder="Leave blank to use the loaded model"
+                    className="font-mono text-sm"
+                  />
+                  {lmStatus?.ok && lmStatus.models.length > 0 && (
+                    <div className="flex gap-1 flex-wrap mt-1">
+                      {lmStatus.models.map((m) => (
+                        <Badge
+                          key={m}
+                          variant="outline"
+                          className="text-xs cursor-pointer hover:bg-primary/10"
+                          onClick={() => setLmConfig((p) => ({ ...p, embeddingModel: m }))}
+                        >
+                          {m}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">Used for document indexing and knowledge base search. Use a dedicated embedding model like <code className="bg-muted px-1 rounded">nomic-embed-text</code> for best results.</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <Button onClick={handleSaveLMConfig} className="gap-2">
+                <Save className="w-4 h-4" /> Save LM Studio Settings
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Vector Store Management */}
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Layers className="w-4 h-4" /> Vector Store
+              </CardTitle>
+              <CardDescription>Manage local embeddings generated from knowledge base documents.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+                <div className="flex items-center gap-3">
+                  <Layers className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Stored Embeddings</p>
+                    <p className="text-xs text-muted-foreground">{totalChunks} text chunks indexed</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="font-mono">{totalChunks} chunks</Badge>
+              </div>
+
+              <div className="p-3 rounded-lg bg-muted/30 space-y-1">
+                <p className="text-xs font-medium text-foreground">How it works</p>
+                <ul className="text-xs text-muted-foreground space-y-0.5">
+                  <li>• Documents are split into chunks and embedded via LM Studio</li>
+                  <li>• Embeddings are stored locally in your browser (IndexedDB)</li>
+                  <li>• No data is sent to any external server</li>
+                  <li>• Use the Knowledge Base page to process documents</li>
+                </ul>
+              </div>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/10" disabled={clearingEmbeddings || totalChunks === 0}>
+                    {clearingEmbeddings ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    Clear All Embeddings
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear all embeddings?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will delete all {totalChunks} stored vector chunks. Documents will need to be re-processed for AI search. The documents themselves are not deleted.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearEmbeddings} className="bg-destructive text-destructive-foreground">
+                      Clear Embeddings
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardContent>
+          </Card>
+
+          {/* Setup Guide */}
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground text-base">Quick Setup Guide</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ol className="space-y-2 text-sm text-muted-foreground">
+                {[
+                  'Download and install LM Studio from lmstudio.ai',
+                  'In LM Studio, download a chat model (e.g. Llama 3.2, Mistral, Phi-3)',
+                  'For document search, also load an embedding model (e.g. nomic-embed-text)',
+                  'Start the local server in LM Studio (port 1234 by default)',
+                  'Use the Test button above to verify the connection',
+                  'Go to Knowledge Base and click the brain icon to index documents',
+                  'Use the AI Assistant (chat page) to query your data',
+                ].map((step, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                      {i + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
             </CardContent>
           </Card>
         </TabsContent>
