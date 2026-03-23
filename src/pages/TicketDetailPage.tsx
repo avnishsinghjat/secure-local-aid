@@ -118,6 +118,7 @@ export default function TicketDetailPage() {
   };
 
   const changeStatus = async (newStatus: string) => {
+    if (!ticket) return;
     await runExec('UPDATE tickets SET status = ?, updated_at = datetime(\'now\') WHERE id = ?', [newStatus, Number(id)]);
     if (newStatus === 'resolved') await runExec("UPDATE tickets SET resolved_at = datetime('now') WHERE id = ?", [Number(id)]);
     if (newStatus === 'closed') await runExec("UPDATE tickets SET closed_at = datetime('now') WHERE id = ?", [Number(id)]);
@@ -125,6 +126,10 @@ export default function TicketDetailPage() {
       "INSERT INTO audit_log (entity_type, entity_id, action, user_id, details) VALUES ('ticket', ?, 'status_changed', ?, ?)",
       [Number(id), user!.id, `Status changed to ${newStatus}`]
     );
+    const tkt = await runQuery('SELECT requester_id, assigned_user_id FROM tickets WHERE id = ?', [Number(id)]);
+    if (tkt[0]) {
+      await notifyTicketStatusChange(Number(id), ticket.ticket_number, newStatus, tkt[0].requester_id, tkt[0].assigned_user_id);
+    }
     load();
   };
 
