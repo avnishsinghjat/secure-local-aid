@@ -46,10 +46,11 @@ export default function DashboardPage() {
       const [resolved] = await runQuery("SELECT COUNT(*) as c FROM tickets WHERE status = 'resolved'");
       const [mine] = await runQuery('SELECT COUNT(*) as c FROM tickets WHERE requester_id = ? OR assigned_user_id = ?', [user!.id, user!.id]);
       const [unassigned] = await runQuery('SELECT COUNT(*) as c FROM tickets WHERE assigned_team_id IS NULL AND assigned_user_id IS NULL AND status NOT IN (\'draft\',\'closed\',\'rejected\')');
+      const [overdue] = await runQuery("SELECT COUNT(*) as c FROM tickets WHERE due_date < date('now') AND status NOT IN ('closed','resolved','rejected')");
 
       setStats({
         total: total.c, open: open.c, critical: critical.c,
-        resolved: resolved.c, myTickets: mine.c, unassigned: unassigned.c,
+        resolved: resolved.c, myTickets: mine.c, unassigned: unassigned.c, overdue: overdue.c,
       });
 
       const recent = await runQuery(`
