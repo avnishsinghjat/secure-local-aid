@@ -3,7 +3,7 @@ import { get, set, del } from 'idb-keyval';
 
 const DB_KEY = 'ticketing-system-db';
 const DB_VERSION_KEY = 'ticketing-system-db-version';
-const CURRENT_VERSION = 4; // bump to force re-seed
+const CURRENT_VERSION = 5; // bump to force re-seed
 
 let db: Database | null = null;
 let dbReady: Promise<Database> | null = null;
