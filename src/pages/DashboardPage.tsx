@@ -55,7 +55,7 @@ export default function DashboardPage() {
       });
 
       const recent = await runQuery(`
-        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at,
+        SELECT t.id, t.ticket_number, t.title, t.status, t.priority, t.unit, t.created_at, t.due_date,
                u.display_name as requester_name,
                COALESCE(tm.name, 'Unassigned') as assigned_team
         FROM tickets t
