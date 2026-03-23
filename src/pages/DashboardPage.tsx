@@ -74,6 +74,7 @@ export default function DashboardPage() {
     { label: 'Critical', value: stats.critical, icon: AlertTriangle, color: 'text-critical' },
     { label: 'Resolved', value: stats.resolved, icon: CheckCircle2, color: 'text-success' },
     { label: 'My Tickets', value: stats.myTickets, icon: Clock, color: 'text-primary' },
+    { label: 'Overdue', value: stats.overdue, icon: Timer, color: 'text-critical' },
     { label: 'Unassigned', value: stats.unassigned, icon: Users, color: 'text-warning' },
   ];
 
