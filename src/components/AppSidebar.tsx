@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useTheme } from '@/lib/theme-context';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Ticket, Inbox, Users, ClipboardList,
-  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download
+  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download, Sun, Moon
 } from 'lucide-react';
 import { getUnreadCount } from '@/lib/notifications';
 
@@ -23,6 +24,7 @@ const navItems = [
 
 export default function AppSidebar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [unread, setUnread] = useState(0);
@@ -65,16 +67,18 @@ export default function AppSidebar() {
           <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
             <Shield className="w-5 h-5 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-sm font-bold text-foreground tracking-wide">SENTINEL</h1>
             <p className="text-[10px] text-muted-foreground tracking-widest uppercase">Ticketing System</p>
           </div>
+          <button onClick={toggleTheme} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-secondary">
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {/* Notifications link */}
         <button
           onClick={() => navigate('/notifications')}
           className={`nav-item w-full text-left ${isNotifActive ? 'nav-item-active' : ''}`}
