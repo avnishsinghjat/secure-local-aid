@@ -287,7 +287,7 @@ export async function getDb(): Promise<Database> {
   dbReady = (async () => {
     try {
       const SQL = await initSqlJs({
-        locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
+        locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.14.1/${file}`,
       });
 
       // Check version - if schema changed, reset
