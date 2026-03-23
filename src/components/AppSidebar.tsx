@@ -4,7 +4,7 @@ import { useTheme } from '@/lib/theme-context';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Ticket, Inbox, Users, ClipboardList,
-  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download, Sun, Moon
+  Search, FileText, Shield, Settings, LogOut, Bell, BarChart3, Download, Sun, Moon, BookOpen
 } from 'lucide-react';
 import { getUnreadCount } from '@/lib/notifications';
 
